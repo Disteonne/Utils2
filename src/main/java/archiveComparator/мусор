@@ -1,0 +1,46 @@
+ /*
+    public static void main(String[] args) {
+
+        Map<String, LocalDateTime> zipOne=new HashMap<>();
+        Map<String, LocalDateTime> zipTwo=new HashMap<>();
+        Map<String,Long> z=new HashMap<>();
+        BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(System.in));
+        try {
+            System.out.println("Input your directory zip1: ");
+            String pathOne = bufferedReader.readLine();
+            System.out.println("Input your directory zip2: ");
+            String pathTwo=bufferedReader.readLine();
+
+        //          WORK WITH ZIPS
+        //ZipInputStream zip1=new ZipInputStream(new FileInputStream(pathOne));
+        //ZipInputStream zip2=new ZipInputStream(new FileInputStream(pathTwo));
+            ZipFile zipFile1=new ZipFile(pathOne);
+            ZipFile zipFile2=new ZipFile(pathTwo);
+            for (Enumeration<? extends  ZipEntry> iter=zipFile1.entries();iter.hasMoreElements();){
+                ZipEntry zipElement=iter.nextElement();
+                zipOne.put(zipElement.getName(),zipElement.getTimeLocal());
+            }
+            for (Enumeration<? extends  ZipEntry> iter=zipFile2.entries();iter.hasMoreElements();){
+                ZipEntry zipElement=iter.nextElement();
+                zipTwo.put(zipElement.getName(),zipElement.getTimeLocal());
+                z.put(zipElement.getName(),zipElement.getSize());
+
+            }
+
+
+            for (Map.Entry<String,Long> pair:z.entrySet()
+                 ) {
+                System.out.println(pair.getKey()+" "+pair.getValue());
+            }
+
+
+            zipFile1.close();
+        }catch (FileNotFoundException ex){
+
+        }catch (IOException ex){
+
+        }
+    }
+
+
+     */
