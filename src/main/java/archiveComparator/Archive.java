@@ -13,12 +13,32 @@ public class Archive {
     ArrayList<String> changesFirstZip = new ArrayList<>();
     ArrayList<String> changesSecondZip = new ArrayList<>();
 
+
     public Archive() {
+       initFileList();
+    }
+    public  Archive(String pathOne,String pathTwo){
+        if(pathOne==null || pathTwo==null){
+            throw new IllegalStateException();
+        }
+        File fileOne=new File(pathOne);
+        File fileTwo=new File(pathTwo);
+        if(fileOne.exists() && fileTwo.exists()) {
+            fileList.add(fileOne);
+            fileList.add(fileTwo);
+            Map<String, Long> mmm1 = addMap(fileList.get(0));
+            Map<String, Long> mmm2 = addMap(fileList.get(1));
+            compareAndAddToChangesTxt(mmm1, mmm2);
+        }else
+            throw new IllegalStateException();
+
+    }
+
+    public void initFileList(){
         for (int i = 0; i < 2; i++) {
             fileList.add(new File("-1"));
         }
     }
-
     public ArrayList<File> getFile() {
         JFileChooser jFileChooser = new JFileChooser();
         jFileChooser.setAcceptAllFileFilterUsed(false);
@@ -58,112 +78,95 @@ public class Archive {
     }
 
     public void compareAndAddToChangesTxt(Map<String, Long> mapOne, Map<String, Long> mapTwo) {
-        for (Map.Entry<String, Long> pair : mapOne.entrySet()
-        ) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("changes.txt"))) {
+            bufferedWriter.write("Archive 1" + "\t\t\t\t\t" + "Archive 2\n");
+
+            for (Map.Entry<String, Long> pair : mapOne.entrySet()
+            ) {
+                for (Map.Entry<String, Long> pair1 : mapTwo.entrySet()
+                ) {
+                    if (pair.getKey().equals(pair1.getKey()) && !pair.getValue().equals(pair1.getValue())) {
+                        changesFirstZip.add("* update " + pair.getKey());
+                        changesSecondZip.add("* update " + pair1.getKey());
+                        bufferedWriter.write("* update " + pair.getKey() + "\t\t\t" + "* update " + pair1.getKey() + "\n");
+                    }
+                    if (!pair.getKey().equals(pair1.getKey()) && pair.getValue().equals(pair1.getValue())) {
+                        changesFirstZip.add("? rename " + pair.getKey());
+                        changesSecondZip.add("? rename " + pair1.getKey());
+                        bufferedWriter.write("? rename " + pair.getKey() + "\t\t\t" + "? rename " + pair1.getKey() + "\n");
+
+                    }
+                }
+            }
+            ArrayList<String> m1 = new ArrayList<>();
+            ArrayList<String> m2 = new ArrayList<>();
+            for (Map.Entry<String, Long> pair : mapOne.entrySet()
+            ) {
+                m1.add(pair.getKey());
+            }
             for (Map.Entry<String, Long> pair1 : mapTwo.entrySet()
             ) {
-                if (pair.getKey().equals(pair1.getKey()) && !pair.getValue().equals(pair1.getValue())) {
-                    changesFirstZip.add("* update " + pair.getKey());
-                    changesSecondZip.add("* update " + pair1.getKey());
-                }
-                if (!pair.getKey().equals(pair1.getKey()) && pair.getValue().equals(pair1.getValue())) {
-                    changesFirstZip.add("? rename " + pair.getKey());
-                    changesSecondZip.add("? rename " + pair1.getKey());
-                }
+                m2.add(pair1.getKey());
             }
-        }
-        ArrayList<String> m1 = new ArrayList<>();
-        ArrayList<String> m2 = new ArrayList<>();
-        String[] mOne = new String[mapOne.size()];
-        String[] mTwo = new String[mapTwo.size()];
-
-        for (Map.Entry<String, Long> pair : mapOne.entrySet()
-        ) {
-            m1.add(pair.getKey());
-            for (int i = 0; i < mOne.length; i++) {
-                mOne[i] = pair.getKey();
+            ArrayList<String> allChanges = new ArrayList<>();
+            for (int j = 0; j < changesFirstZip.size(); j++) {
+                allChanges.add(changesFirstZip.get(j));
             }
-        }
-        for (Map.Entry<String, Long> pair1 : mapTwo.entrySet()
-        ) {
-            m2.add(pair1.getKey());
-            for (int i = 0; i < mTwo.length; i++) {
-                mTwo[i] = pair1.getKey();
+            for (int j = 0; j < changesSecondZip.size(); j++) {
+                allChanges.add(changesSecondZip.get(j));
             }
-        }
-
-        if (mapOne.size() < mapTwo.size()) {
-            boolean b = false;
-            for (int i = 0; i < m2.size(); i++) {
-                for (int j = 0; j < m1.size(); j++) {
-                    if (m2.get(i).equals(m1.get(j))) {
-                        b = true;
+            if (m2.size() > m1.size()) {
+                for (int i = 0; i < m2.size(); i++) {
+                    for (int j = 0; j < m1.size(); j++) {
+                        if (m2.get(i).equals(m1.get(j))) {
+                            break;
+                        }
+                    }
+                    boolean b=false;
+                    for (int j = 0; j < allChanges.size(); j++) {
+                        if (allChanges.get(j).endsWith(m2.get(i))) {
+                            b=true;
+                           // continue;
+                        }
+                    }
+                    if(!b){
+                        bufferedWriter.write("- remove " + m2.get(i) + "\t\t\t" + "+ addNew " + m2.get(i) + "\n");
                     }
                 }
-                if (!b) {
-                    changesFirstZip.add("- remove " + m1.get(i));
-                    changesSecondZip.add("+ addNew " + m1.get(i));
-                }
             }
-        } else {
-            boolean b = false;
-            for (int i = 0; i < m1.size(); i++) {
-                for (int j = 0; j < m2.size(); j++) {
-                    if (m1.get(i).equals(m2.get(j))) {
-                        b = true;
+
+            if(m2.size()<m1.size()){
+                for (int i = 0; i < m1.size(); i++) {
+                    for (int j = 0; j < m2.size(); j++) {
+                        if (m1.get(i).equals(m2.get(j))) {
+                            //b = true;
+                            break;
+                        }
                     }
-                }
-                if (!b) {
-                    changesFirstZip.add("+ addNew " + m1.get(i));
-                    changesSecondZip.add("- remove " + m1.get(i));
-                }
-            }
-
-            /*
-            for (int i = 0; i < mTwo.length; i++) {
-                int search = Arrays.binarySearch(mOne, mTwo[i]);
-                if (search == -1) {
-                    changesFirstZip.add("- remove " + mTwo[i]);
-                    changesSecondZip.add("+ addNew " + mTwo[i]);
+                    boolean b=false;
+                    for (int j = 0; j < allChanges.size(); j++) {
+                        if (allChanges.get(j).endsWith(m1.get(i))) {
+                            b=true;
+                           // continue;
+                        }
+                    }
+                    if(!b)
+                        bufferedWriter.write("+ addNew " + m1.get(i) + "\t\t\t" + "- remove " + m1.get(i) + "\n");
                 }
             }
-
-             */
+        } catch (IOException e) {
+            e.getStackTrace();
         }
+
     }
-
-    /*
-    public void readyToLaunch(){
-        Archive archive=new Archive();
-        ArrayList<File> file= archive.fileList;
-        Map<String,Long> mmm1=archive.addMap(file.get(0));
-        Map<String,Long> mmm2=archive.addMap(file.get(1));
-        archive.compareAndAddToChangesTxt(mmm1,mmm2);
-        for (String s:archive.changesFirstZip
-             ) {
-            System.out.println(s);
-        }
-    }
-
-     */
-    public static void main(String[] args) {
-        /*
-        Archive archive = new Archive();
-        ArrayList<File> file = archive.getFile();
-        for (File f : file
-        ) {
-            System.out.println(f.getAbsoluteFile());
-        }
-         */
+    public static void readyToLaunch() {
         Archive archive = new Archive();
         ArrayList<File> file = archive.getFile();
         Map<String, Long> mmm1 = archive.addMap(file.get(0));
         Map<String, Long> mmm2 = archive.addMap(file.get(1));
         archive.compareAndAddToChangesTxt(mmm1, mmm2);
-        for (String s : archive.changesFirstZip
-        ) {
-            System.out.println(s);
-        }
-
+    }
+    public static void main(String[] args) {
+        Archive.readyToLaunch();
     }
 }
