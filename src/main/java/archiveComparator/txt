@@ -6,6 +6,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 
@@ -71,6 +72,15 @@ public class Archive {
         Map<String, Long> tempMap = new HashMap<>();
         try {
             ZipInputStream zip = new ZipInputStream(new FileInputStream(file), StandardCharsets.ISO_8859_1);
+
+            //ZipFile zip = new ZipFile(new FileInputStream(file));
+            /*
+            for (Enumeration<? extends ZipEntry> iter = zip.entries(); iter.hasMoreElements(); ) {
+                ZipEntry zipElement = iter.nextElement();
+                tempMap.put(zipElement.getName(), zipElement.getSize());
+            }
+
+             */
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
                 tempMap.put(entry.getName(), entry.getSize());
@@ -93,7 +103,10 @@ public class Archive {
                     if (pair.getKey().equals(pair1.getKey()) && !pair.getValue().equals(pair1.getValue())) {
                         changesFirstZip.add("* update " + pair.getKey());
                         changesSecondZip.add("* update " + pair1.getKey());
+                        //allChanges.add(pair.getKey());
+                        //allChanges.add(pair1.getKey());
                         bufferedWriter.write(String.format("%-30.50s","* update "+pair.getKey())+" | "+String.format("%-30.50s","* update "+pair1.getKey())+"\n");
+                   //     bufferedWriter.write("* update " + pair.getKey() + "\t\t\t" + "* update " + pair1.getKey() + "\n");
                     }
                     if (!pair.getKey().equals(pair1.getKey()) && pair.getValue().equals(pair1.getValue())) {
                         changesFirstZip.add("? rename " + pair.getKey());
@@ -101,6 +114,8 @@ public class Archive {
                         allChanges.add(pair.getKey());
                         allChanges.add(pair1.getKey());
                         bufferedWriter.write(String.format("%-30.40s","? rename "+pair.getKey())+" | "+String.format("%-30.40s","? rename "+pair1.getKey())+"\n");
+                       // bufferedWriter.write("? rename " + pair.getKey() + "\t\t\t" + "? rename " + pair1.getKey() + "\n");
+
                     }
                 }
             }
@@ -114,6 +129,16 @@ public class Archive {
             ) {
                 m2.add(pair1.getKey());
             }
+            /*
+            ArrayList<String> allChanges = new ArrayList<>();
+            for (int j = 0; j < changesFirstZip.size(); j++) {
+                allChanges.add(changesFirstZip.get(j));
+            }
+            for (int j = 0; j < changesSecondZip.size(); j++) {
+                allChanges.add(changesSecondZip.get(j));
+            }
+
+             */
 
             for (int i = 0; i < m2.size(); i++) {
                 boolean b1 = false;
@@ -160,10 +185,14 @@ public class Archive {
                     bufferedWriter.write(String.format("%-30.40s",str)+" | "+String.format("%-30.40s","")+"\n");
                 }
             }
+
+
         } catch (IOException e) {
             e.getStackTrace();
         }
+
     }
+
     public static void readyToLaunch() {
         Archive archive = new Archive();
         ArrayList<File> file = archive.getFile();
@@ -173,7 +202,7 @@ public class Archive {
     }
 
     public static void main(String[] args) {
-        //Archive.readyToLaunch();
+        //Archive.readyToLaunch(); // Example.zip
         Archive archive = new Archive("Example.zip", "Example - Copy.zip");
     }
 }
