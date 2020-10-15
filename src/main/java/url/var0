@@ -1,5 +1,8 @@
 package url;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
@@ -15,39 +18,49 @@ public class UrlDownloader {
     }
     public void writeToFile(String pathURL, String saveFilePath) {
         try {
+
             URL pageUrl = null;
             URLConnection connection = null;
             pageUrl = new URL(pathURL);
             connection=pageUrl.openConnection();
             connection.connect();
             BufferedWriter bufferedWriter;
-            InputStreamReader readIn = new InputStreamReader(connection.getInputStream());
-            BufferedReader bufferedReader = new BufferedReader(readIn);
-            String data="";
-
             if(saveFilePath==null) {
                 String nameFile=nameFile(pathURL);
-                while ((data=bufferedReader.readLine())!=null){
-                    bufferedWriter=new BufferedWriter(new FileWriter(nameFile));
+                bufferedWriter=new BufferedWriter(new FileWriter(nameFile));
+                /*
+                Pattern pattern=Pattern.compile("([/]([a-zA-Z]*[а-яА-Я]*[.]?[0-9])+[/])");
+                Matcher matcher= pattern.matcher(pathURL);
+                String strForLength="";
+                while (matcher.find()){
+                    strForLength= matcher.group();
                 }
+                if (strForLength.length()+6==pathURL.length()) {
+                     bufferedWriter = new BufferedWriter(new FileWriter("saveUrl.txt"));
+                }else {
+                    String[] splUrlString=pathURL.split(strForLength);
+                    String[] splUrlStrRight=splUrlString[1].split("[?]");
+                    bufferedWriter = new BufferedWriter(new FileWriter(splUrlStrRight[0]+".txt"));
+                }
+
+                 */
             }else {
-                File file = new File(saveFilePath);
-                if (!file.exists()) {
-                    bufferedWriter = new BufferedWriter(new FileWriter(saveFilePath));
+                File file=new File(saveFilePath);
+                if(!file.exists()){
+                 bufferedWriter=new BufferedWriter(new FileWriter(saveFilePath));
                 }
-                if (file.exists() && file.isFile()) {
+                if(file.exists()){
                     System.out.println("Замена файла 'R'. Переименовать файл 'N'");
-                    Scanner scanner = new Scanner(System.in);
-                    String tmpStr = scanner.nextLine().toUpperCase();
-                    if (tmpStr.equals("R")) {
-                        bufferedWriter = new BufferedWriter(new FileWriter(saveFilePath, false));
-                    } else if (tmpStr.equals("N")) {
-                        bufferedWriter = new BufferedWriter(new FileWriter(tmpStr));
+                    Scanner scanner=new Scanner(System.in);
+                    String tmpStr=scanner.nextLine().toUpperCase();
+                    if(tmpStr.equals("R")){
+                        bufferedWriter=new BufferedWriter(new FileWriter(saveFilePath));
+                    }
+                    if(tmpStr.equals("N")){
+                        bufferedWriter=new BufferedWriter(new FileWriter(tmpStr))
                     }
                 }
-                if (file.isDirectory() && !file.isFile()) {
-                    bufferedWriter = new BufferedWriter(new FileWriter(nameFile(pathURL)));
-                }
+                 bufferedWriter = new BufferedWriter(new FileWriter(saveFilePath));
             }
 
 
