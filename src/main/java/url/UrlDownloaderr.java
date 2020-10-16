@@ -50,35 +50,63 @@ public class UrlDownloaderr {
         if (strForLength.length() +9 == url.length() ) {
             if(isHtmlPage) {
                 return "saveUrl.html";
-            }else
-                return "saveUrl";//+getLast();
+            }else {
+                if(!url.endsWith(getLast())) {
+                    return "saveUrl"+getLast();//+getLast();
+                }else
+                    return "saveUrl";
+            }
         } else {
                 String tmp= url;
             if (tmp.contains("?")) {
-                tmp=tmp.substring(tmp.lastIndexOf("/"));
-                tmp = tmp.substring(1, tmp.lastIndexOf("?"));
+                tmp=tmp.substring(0,tmp.lastIndexOf("?"));
+                tmp=tmp.substring(tmp.lastIndexOf("/")+1);
+                int i=5;
+                //tmp=tmp.substring(1,tmp.length()-1);
+                //tmp=tmp.substring(tmp.lastIndexOf("/"));
+                //tmp = tmp.substring(1, tmp.lastIndexOf("?"));
             }else {
-                tmp=tmp.substring(tmp.lastIndexOf("/")+1,tmp.length());
+                tmp=tmp.substring(tmp.lastIndexOf("/")+1);
             }
             if(isHtmlPage) {
                 return tmp + ".html";
-            }else
-                return tmp;//+getLast();
+            }else {
+                String getl=getLast();
+                //if(url.endsWith(getLast())) {
+                 //   return tmp;//+getLast();
+                //}else {
+                    return tmp+getLast();
+                //}
+            }
         }
     }
 
     public void saveDefault() throws IOException {
         connection.connect();
-        isr = new InputStreamReader(connection.getInputStream(),encoding);
-        br = new BufferedReader(isr);
+
         String str = "";
-        bf = new BufferedWriter(new FileWriter(fileName()));
-        while ((str = br.readLine()) != null) {
-            bf.write(str);
+        if(isHtmlPage) {
+            isr = new InputStreamReader(connection.getInputStream(),encoding);
+            br = new BufferedReader(isr);
+            bf = new BufferedWriter(new FileWriter(fileName()));
+            while ((str = br.readLine()) != null) {
+                bf.write(str);
+            }
+            isr.close();
+            br.close();
+            bf.close();
+        }else {
+            InputStream is=webUrl.openStream();
+            OutputStream os=new FileOutputStream(fileName());
+            byte[] bytes=new byte[2048];
+            int length;
+            while ((length=is.read(bytes))!=-1){
+                os.write(bytes,0,length);
+            }
+            is.close();
+            os.close();
         }
-        isr.close();
-        br.close();
-        bf.close();
+
     }
 
     public boolean isHtml() throws IOException {
@@ -95,11 +123,11 @@ public class UrlDownloaderr {
     }
     public String getLast(){
         String tmp=url;
-        return  tmp.substring(tmp.lastIndexOf('.'),tmp.length());
+        return  tmp.substring(tmp.lastIndexOf('.'));
     }
     public void savePath() throws IOException {
         connection.connect();
-        isr = new InputStreamReader(connection.getInputStream(),encoding);
+        isr = new InputStreamReader(connection.getInputStream());//,encoding);
         br = new BufferedReader(isr);
 
         String str="";
@@ -116,29 +144,67 @@ public class UrlDownloaderr {
             Scanner scanner = new Scanner(System.in);
             String tmpStr = scanner.nextLine().toUpperCase();
             if (tmpStr.equals("R")) {
-                bf= new BufferedWriter(new FileWriter(path, false));
-                while ((str = br.readLine()) != null) {
-                    bf.write(str);
+                if(isHtmlPage) {
+                    bf = new BufferedWriter(new FileWriter(path, false));
+                    while ((str = br.readLine()) != null) {
+                        bf.write(str);
+                    }
+                }else {
+                    InputStream is=webUrl.openStream();
+                    OutputStream os=new FileOutputStream(path,false);
+                    byte[] bytes=new byte[2048];
+                    int length;
+                    while ((length=is.read(bytes))!=-1){
+                        os.write(bytes,0,length);
+                    }
+                    is.close();
+                    os.close();
                 }
             } else if (tmpStr.equals("N")) {
                 System.out.println("Введите название файла");
                 String tmp=scanner.nextLine();
-                bf = new BufferedWriter(new FileWriter(tmp));
-                while ((str = br.readLine()) != null) {
-                    bf.write(str);
+                if(isHtmlPage) {
+                    bf = new BufferedWriter(new FileWriter(tmp));
+                    while ((str = br.readLine()) != null) {
+                        bf.write(str);
+                    }
+                }else {
+                    InputStream is=webUrl.openStream();
+                    OutputStream os=new FileOutputStream(fileName());
+                    byte[] bytes=new byte[2048];
+                    int length;
+                    while ((length=is.read(bytes))!=-1){
+                        os.write(bytes,0,length);
+                    }
+                    is.close();
+                    os.close();
                 }
             }
         }
         if (file.isDirectory() && !file.isFile()){
             String name=fileName();
-            bf=new BufferedWriter(new FileWriter(name));
-            while ((str = br.readLine()) != null) {
-                bf.write(str);
+            //C:\Users\huawei\Desktop\TEST\java_tests
+            if(isHtmlPage) {
+                bf = new BufferedWriter(new FileWriter(path + "\\" + name));
+                while ((str = br.readLine()) != null) {
+                    bf.write(str);
+                }
+                bf.close();
+                br.close();
+                isr.close();
+            }else {
+                InputStream is=webUrl.openStream();
+                OutputStream os=new FileOutputStream(path + "\\" + name);
+                byte[] bytes=new byte[2048];
+                int length;
+                while ((length=is.read(bytes))!=-1){
+                    os.write(bytes,0,length);
+                }
+                is.close();
+                os.close();
             }
         }
-        bf.close();
-        br.close();
-        isr.close();
+
     }
 
     public void actions() throws IOException {
