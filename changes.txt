@@ -1,6 +1,0 @@
-Archive 1					Archive 2
-? rename debuG.txt             | ? rename CurriculumVitae.java 
-                               | + addNew debug.txt            
-                               | + addNew CodeRules.doc        
-- remove debug.txt             |                               
-- remove CodeRules.doc         |                               

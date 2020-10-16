@@ -1,5 +1,6 @@
 package url;
 
+import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -13,13 +14,13 @@ public class UrlDownloaderr {
     private String path = null;
     private String open = null;
     private URL webUrl;
-    private String encoding;
+    private String encoding="utf-8";
     BufferedWriter bf;
     BufferedReader br;
     InputStreamReader isr;
     URLConnection connection;
     private  boolean isHtmlPage=false;
-
+    File file;
     public void input() {
         System.out.println("Если не желаете вводить данные ,то введите NO");
         Scanner scanner = new Scanner(System.in);
@@ -32,7 +33,7 @@ public class UrlDownloaderr {
         this.path = scanner.nextLine();
         System.out.println("Open:");
         this.open = scanner.nextLine();
-        scanner.close();
+        //scanner.close();
         try {
             webUrl = new URL(url);
             connection = webUrl.openConnection();
@@ -41,10 +42,8 @@ public class UrlDownloaderr {
     }
 
     public String fileName() throws IOException {
-        String strForLength = url.substring(8,url.length());
-        //String[] strTmpArray=strForLength.split("/");
+        String strForLength = url.substring(url.indexOf("//")+2);
         strForLength=strForLength.substring(0,strForLength.indexOf("/"));
-        //strForLength=strTmpArray[0];
         int l=strForLength.length();
         int ll=url.length();
         if (strForLength.length() +9 == url.length() ) {
@@ -58,37 +57,28 @@ public class UrlDownloaderr {
             }
         } else {
                 String tmp= url;
-            if (tmp.contains("?")) {
-                tmp=tmp.substring(0,tmp.lastIndexOf("?"));
-                tmp=tmp.substring(tmp.lastIndexOf("/")+1);
-                int i=5;
-                //tmp=tmp.substring(1,tmp.length()-1);
-                //tmp=tmp.substring(tmp.lastIndexOf("/"));
-                //tmp = tmp.substring(1, tmp.lastIndexOf("?"));
-            }else {
-                tmp=tmp.substring(tmp.lastIndexOf("/")+1);
-            }
-            if(isHtmlPage) {
-                return tmp + ".html";
-            }else {
-                String getl=getLast();
-                //if(url.endsWith(getLast())) {
-                 //   return tmp;//+getLast();
-                //}else {
-                    return tmp+getLast();
-                //}
+                if(isHtmlPage) {
+                    if (tmp.contains("?")) {
+                        tmp = tmp.substring(0, tmp.lastIndexOf("?"));
+                        tmp = tmp.substring(tmp.lastIndexOf("/") + 1);
+                    } else {
+                        tmp = tmp.substring(tmp.lastIndexOf("/") + 1);
+                    }
+                    return tmp+".html";
+                } else {
+                    return tmp.substring(tmp.lastIndexOf("/")+1);
             }
         }
     }
 
     public void saveDefault() throws IOException {
+        file=new File(fileName());
         connection.connect();
-
         String str = "";
         if(isHtmlPage) {
             isr = new InputStreamReader(connection.getInputStream(),encoding);
             br = new BufferedReader(isr);
-            bf = new BufferedWriter(new FileWriter(fileName()));
+            bf = new BufferedWriter(new FileWriter(file));
             while ((str = br.readLine()) != null) {
                 bf.write(str);
             }
@@ -97,7 +87,7 @@ public class UrlDownloaderr {
             bf.close();
         }else {
             InputStream is=webUrl.openStream();
-            OutputStream os=new FileOutputStream(fileName());
+            OutputStream os=new FileOutputStream(file);
             byte[] bytes=new byte[2048];
             int length;
             while ((length=is.read(bytes))!=-1){
@@ -118,8 +108,12 @@ public class UrlDownloaderr {
         urlc.setRequestMethod("HEAD");
         urlc.connect();
         String mime = urlc.getContentType();
-        this.encoding = mime.substring(mime.lastIndexOf("=")+1, mime.length());
-        return mime.startsWith("text/html") ? true : false;
+        boolean b=false;
+        b=mime.startsWith("text/html") ? true : false;
+        if(b) {
+            this.encoding = mime.substring(mime.lastIndexOf("=") + 1, mime.length());
+        }
+        return b;
     }
     public String getLast(){
         String tmp=url;
@@ -127,31 +121,30 @@ public class UrlDownloaderr {
     }
     public void savePath() throws IOException {
         connection.connect();
-        isr = new InputStreamReader(connection.getInputStream());//,encoding);
+        isr = new InputStreamReader(connection.getInputStream(),encoding);//,encoding);
         br = new BufferedReader(isr);
-
         String str="";
-        File file = new File(path);
+        file = new File(path);
+        file.mkdir();
         if (!file.exists()) {
-            file.mkdir();
-            bf=new BufferedWriter(new FileWriter(path));
+            bf=new BufferedWriter(new FileWriter(file));
             while ((str = br.readLine()) != null) {
                 bf.write(str);
             }
         }
         if(file.exists() && file.isFile()){
             System.out.println("Замена файла 'R'. Переименовать файл 'N'");
-            Scanner scanner = new Scanner(System.in);
-            String tmpStr = scanner.nextLine().toUpperCase();
+            Scanner scanner=new Scanner(System.in);
+            String tmpStr=scanner.nextLine();
             if (tmpStr.equals("R")) {
                 if(isHtmlPage) {
-                    bf = new BufferedWriter(new FileWriter(path, false));
+                    bf = new BufferedWriter(new FileWriter(file, false));
                     while ((str = br.readLine()) != null) {
                         bf.write(str);
                     }
                 }else {
                     InputStream is=webUrl.openStream();
-                    OutputStream os=new FileOutputStream(path,false);
+                    OutputStream os=new FileOutputStream(file,false);
                     byte[] bytes=new byte[2048];
                     int length;
                     while ((length=is.read(bytes))!=-1){
@@ -161,16 +154,20 @@ public class UrlDownloaderr {
                     os.close();
                 }
             } else if (tmpStr.equals("N")) {
-                System.out.println("Введите название файла");
+                System.out.println("Введите новое имя файла");
                 String tmp=scanner.nextLine();
+                String editPath=path.substring(0,path.lastIndexOf("\\")+1);
+                String getEd=path.substring(path.lastIndexOf("."));
+                String res=editPath+tmp+getEd;
+                file=new File(res);
                 if(isHtmlPage) {
-                    bf = new BufferedWriter(new FileWriter(tmp));
+                    bf = new BufferedWriter(new FileWriter(file));
                     while ((str = br.readLine()) != null) {
                         bf.write(str);
                     }
                 }else {
                     InputStream is=webUrl.openStream();
-                    OutputStream os=new FileOutputStream(fileName());
+                    OutputStream os=new FileOutputStream(file);
                     byte[] bytes=new byte[2048];
                     int length;
                     while ((length=is.read(bytes))!=-1){
@@ -182,10 +179,9 @@ public class UrlDownloaderr {
             }
         }
         if (file.isDirectory() && !file.isFile()){
-            String name=fileName();
-            //C:\Users\huawei\Desktop\TEST\java_tests
+            file=new File(path+"\\"+fileName());
             if(isHtmlPage) {
-                bf = new BufferedWriter(new FileWriter(path + "\\" + name));
+                bf = new BufferedWriter(new FileWriter(file));
                 while ((str = br.readLine()) != null) {
                     bf.write(str);
                 }
@@ -194,7 +190,7 @@ public class UrlDownloaderr {
                 isr.close();
             }else {
                 InputStream is=webUrl.openStream();
-                OutputStream os=new FileOutputStream(path + "\\" + name);
+                OutputStream os=new FileOutputStream(file);
                 byte[] bytes=new byte[2048];
                 int length;
                 while ((length=is.read(bytes))!=-1){
@@ -204,7 +200,14 @@ public class UrlDownloaderr {
                 os.close();
             }
         }
-
+    }
+    public void openResource(){
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop desktop = Desktop.getDesktop();;
+                desktop.open(file);
+            } catch (IOException ex) {}
+        }
     }
 
     public void actions() throws IOException {
@@ -215,6 +218,10 @@ public class UrlDownloaderr {
         }
         if(!path.toLowerCase().equals("no")){
             savePath();
+        }
+        if(!path.toLowerCase().equals("no") && !open.toLowerCase().equals("no")){
+            savePath();
+            openResource();
         }
     }
 
