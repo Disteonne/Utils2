@@ -78,14 +78,7 @@ public class UrlDownloaderr {
                 }
                 return tmp + ".html";
             } else {
-                String temp=tmp;
-                if(temp.endsWith("/")) {
-                    temp = temp.substring(0, temp.lastIndexOf("/"));
-                    tmp = temp.substring(temp.lastIndexOf("/") + 1);
-                    return tmp;
-                }else {
-                    return tmp.substring(tmp.lastIndexOf("/") + 1);
-                }
+                return tmp.substring(tmp.lastIndexOf("/") + 1);
             }
         }
     }
@@ -156,6 +149,7 @@ public class UrlDownloaderr {
                 bf.write(str);
             }
         }
+        //C:\Users\huawei\Desktop\TEST\mam\op
         if (file.exists() && file.isFile()) {
             System.out.println("Замена файла 'R'. Переименовать файл 'N'");
             Scanner scanner = new Scanner(System.in);
@@ -203,7 +197,7 @@ public class UrlDownloaderr {
             }
         }
         if (file.isDirectory() && !file.isFile()) {
-            file = new File(path + "\\" + this.fileName());
+            file = new File(path + "\\" + fileName());
             if (isHtmlPage) {
                 bf = new BufferedWriter(new FileWriter(file));
                 while ((str = br.readLine()) != null) {
@@ -227,12 +221,16 @@ public class UrlDownloaderr {
                 os.close();
             }
         }
+        //bf.close();
+        //br.close();
+        //isr.close();
     }
 
     public void openResource() {
         if (Desktop.isDesktopSupported()) {
             try {
                 Desktop desktop = Desktop.getDesktop();
+                ;
                 desktop.open(file);
             } catch (IOException ex) {
             }
@@ -249,8 +247,7 @@ public class UrlDownloaderr {
             saveDefault();
             if (!isNew) {
                 if (isHtmlPage) {
-                    //savePicturesAndLink("<img","src=");
-                    savePicturesAndLink("<link","href=");
+                    savePictures();
                 }
             }
             if(!open.toLowerCase().equals("no")){
@@ -262,42 +259,57 @@ public class UrlDownloaderr {
             savePath();
             if (!isNew) {
                 if (isHtmlPage) {
-                    //savePicturesAndLink("<img","src=");
-                    savePicturesAndLink("<link","href=");
+                    savePictures();
                 }
             }
             if(!open.toLowerCase().equals("no")){
                 openResource();
             }
         }
+
+/*
+        if (!path.toLowerCase().equals("no") && !open.toLowerCase().equals("no")) {
+            savePath();
+            if (!isNew) {
+                if (isHtmlPage) {
+                    savePictures();
+                }
+            }
+            openResource();
+        }
+
+ */
+
     }
-                                // <img     //src=
-                                // <link    //href=
-    public void savePicturesAndLink(String start,String startLink) throws IOException {
+
+    public void savePictures() throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
         file.mkdirs();
         String tmp = "";
+        //bf = new BufferedWriter(new FileWriter(file));
         ArrayList<String> list = new ArrayList<>();
         while ((tmp = bufferedReader.readLine()) != null) {
             String newTmp = tmp;
-            while (newTmp.contains(start)) {//|| tmp.contains("<link")) {
-                String img = newTmp.substring(newTmp.indexOf(start));
+            while (newTmp.contains("<img")) {//|| tmp.contains("<link")) {
+                //if (tmp.contains("<img src=")) {
+                //String newTmp = tmp;
+                String img = newTmp.substring(newTmp.indexOf("<img"));
                 img=img.substring(0,img.indexOf(">")+1);//<img...src="....>
+                //String searchImg=img.substring(img.indexOf("src="));
                 String replaceString=img;
+                //String searchImg = newTmp.substring(newTmp.indexOf("img src=") - 1);
+                //String replaceString = searchImg.substring(0, searchImg.indexOf(">"));//<img src=".....>
                 if (!replaceString.contains("http")) {
                     newTmp  = newTmp.substring(newTmp.indexOf(replaceString));
                     newTmp = newTmp.substring(replaceString.length());
                     continue;
                 }
-                String newURL=img.substring(img.indexOf(startLink)+startLink.length());
-                if(newURL.startsWith("\"")) {
-                    newURL = newURL.substring(newURL.indexOf("\"") + 1);
-                    newURL = newURL.substring(0, newURL.indexOf("\""));
-                }else {
-                    newTmp  = newTmp.substring(newTmp.indexOf(replaceString));
-                    newTmp = newTmp.substring(replaceString.length());
-                    continue;
-                }
+                String newURL=img.substring(img.indexOf("src="));
+                newURL=newURL.substring(newURL.indexOf("\"")+1);
+                newURL=newURL.substring(0,newURL.indexOf("\""));
+                //String newURL = replaceString.substring(replaceString.indexOf("\"") + 1);
+                //newURL = newURL.substring(0,newURL.indexOf("\"")+1);
+                //newURL = newURL.substring(0, newURL.indexOf("\""));// получили новое url
                 UrlDownloaderr urlDown = new UrlDownloaderr();
                 urlDown.flag = true;
                 urlDown.url = newURL;
@@ -306,9 +318,9 @@ public class UrlDownloaderr {
                 if (file.isDirectory() && !file.isFile()) {
                     urlDown.path = this.path + "\\" + fileName() + "_" + "files";
                 } else {
-                    String s=file.getAbsolutePath();
+                    String pathFile = file.getAbsolutePath();
                     urlDown.path = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf("\\")) + "\\" + fileName() + "_" + "files";
-                    String ss= urlDown.fileName();
+                    String str = "";
                 }
                 urlDown.actions();
                 int length = this.path.length();
@@ -317,6 +329,70 @@ public class UrlDownloaderr {
                 tmp = tmp.replace(replaceString, result);
                 newTmp = newTmp.substring(newTmp.indexOf(replaceString));
                 newTmp = newTmp.substring(replaceString.length() + 1);
+                // }
+                    /*
+                    Pattern pattern = Pattern.compile("<img src=\".+\"");
+                    Matcher matcher = pattern.matcher(tmp);
+                    String replaceStr = "";
+                    String localPath = "";
+                    String result = "";
+                    while (matcher.find()) {
+                        flag = true;
+                        replaceStr = matcher.group();
+                        String[] getUrlPicture = replaceStr.split("\"");
+                        String replaceUrl = getUrlPicture[1];
+                        UrlDownloaderr urlDown = new UrlDownloaderr();
+                        urlDown.flag=true;
+                        urlDown.url = replaceUrl;
+                        if (urlDown.url.contains("local") || !urlDown.url.contains("http")){
+                            continue;
+                        }
+                        if(file.isDirectory() && !file.isFile()){
+                            urlDown.path=this.path+"\\"+urlDown.fileName() + "_" + "files";
+                        }else {
+                            urlDown.path = this.path.substring(0, this.path.lastIndexOf("\\"))+"\\" + fileName() + "_" + "files";
+                        }
+                        urlDown.open = "NO";
+                        urlDown.actions();
+                        int length = this.path.substring(0, this.path.lastIndexOf("\\")).length();
+                        localPath = urlDown.file.getAbsolutePath().substring(length + 1);
+                        result = replaceStr.replace(replaceUrl, localPath);
+                        tmp = tmp.replace(result, localPath);
+                    }
+                    //tmp=tmp.replace(replaceStr,localPath);
+                }
+                /*
+                if (tmp.contains("<link")) {
+                    Pattern pattern = Pattern.compile("<link .+>");
+                    Matcher matcher = pattern.matcher(tmp);
+                    String replaceStr = "";
+                    String localPath = "";
+                    String result = "";
+                    while (matcher.find()) {
+                        flag=true;
+                        replaceStr = matcher.group();
+                        String[] getUrlPicture = replaceStr.split("href=\"");
+                        String replaceUrl = getUrlPicture[1];
+                        UrlDownloaderr urlDown = new UrlDownloaderr();
+                        urlDown.flag=true;
+                        urlDown.url = replaceUrl;
+                        if (urlDown.url.contains("local") && !urlDown.url.contains("http")){
+                            continue;
+                        }
+                        if(file.isDirectory() && !file.isFile()){
+                            urlDown.path=this.path+"\\"+urlDown.fileName() + "_" + "files";
+                        }else {
+                            urlDown.path = this.path.substring(0, this.path.lastIndexOf("\\"))+"\\" + fileName() + "_" + "files";
+                        }
+                        urlDown.open = "NO";
+                        urlDown.actions();
+                        int length = this.path.substring(0, this.path.lastIndexOf("\\")).length();
+                        localPath = urlDown.file.getAbsolutePath().substring(length + 1);
+                        result = replaceStr.replace(replaceUrl, localPath);
+                        tmp = tmp.replace(result, localPath);
+                    }
+                }
+                 */
             }
             list.add(tmp);
         }
