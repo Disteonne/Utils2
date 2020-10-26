@@ -174,6 +174,6 @@ public class Archive {
 
     public static void main(String[] args) {
         Archive.readyToLaunch();
-        //Archive archive = new Archive("Example.zip", "Example - Copy.zip");
+        Archive archive = new Archive("Example.zip", "Example - Copy.zip");
     }
 }

@@ -22,21 +22,20 @@ public class UrlDownloaderr {
     File file;
     boolean flag = false;
     boolean isNew = false;
+    ArrayList<String> list = new ArrayList<>();
 
     public void input() {
-        System.out.println("Если не желаете вводить данные ,то введите NO");
+        System.out.println("INPUT");
         Scanner scanner = new Scanner(System.in);
         System.out.println("URL:");
         this.url = scanner.nextLine();
         if (this.url.equals("")) {
             throw new IllegalStateException();
         }
-        System.out.println("Path:");
+        System.out.println("Path (maybe is empty:");
         this.path = scanner.nextLine();
-        System.out.println("Open:");
+        System.out.println("Open (YES/NO):");
         this.open = scanner.nextLine();
-        //scanner.close();
-
     }
 
     public void getConnection() {
@@ -57,7 +56,7 @@ public class UrlDownloaderr {
                 return "index.html";
             } else {
                 if (!url.endsWith(getLast())) {
-                    return "index" + getLast();//+getLast();
+                    return "index" + getLast();
                 } else
                     return "index";
             }
@@ -145,7 +144,7 @@ public class UrlDownloaderr {
 
     public void savePath() throws IOException {
         connection.connect();
-        isr = new InputStreamReader(connection.getInputStream(), encoding);//,encoding);
+        isr = new InputStreamReader(connection.getInputStream(), encoding);
         br = new BufferedReader(isr);
         String str = "";
         file = new File(path);
@@ -209,12 +208,9 @@ public class UrlDownloaderr {
                 while ((str = br.readLine()) != null) {
                     bf.write(str);
                 }
-                String skek = "";
-
                 bf.close();
                 br.close();
                 isr.close();
-
             } else {
                 InputStream is = webUrl.openStream();
                 OutputStream os = new FileOutputStream(file);
@@ -241,7 +237,7 @@ public class UrlDownloaderr {
 
     public void actions() throws IOException {
         if (!flag) {
-            input();//вводим данные
+            input();
         }
         getConnection();
         this.isHtmlPage = isHtml();
@@ -249,7 +245,7 @@ public class UrlDownloaderr {
             saveDefault();
             if (!isNew) {
                 if (isHtmlPage) {
-                    //savePicturesAndLink("<img","src=");
+                    savePicturesAndLink("<img","src=");
                     savePicturesAndLink("<link","href=");
                 }
             }
@@ -262,7 +258,7 @@ public class UrlDownloaderr {
             savePath();
             if (!isNew) {
                 if (isHtmlPage) {
-                    //savePicturesAndLink("<img","src=");
+                    savePicturesAndLink("<img","src=");
                     savePicturesAndLink("<link","href=");
                 }
             }
@@ -277,12 +273,12 @@ public class UrlDownloaderr {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
         file.mkdirs();
         String tmp = "";
-        ArrayList<String> list = new ArrayList<>();
+        //ArrayList<String> list = new ArrayList<>();
         while ((tmp = bufferedReader.readLine()) != null) {
             String newTmp = tmp;
-            while (newTmp.contains(start)) {//|| tmp.contains("<link")) {
+            while (newTmp.contains(start)) {
                 String img = newTmp.substring(newTmp.indexOf(start));
-                img=img.substring(0,img.indexOf(">")+1);//<img...src="....>
+                img=img.substring(0,img.indexOf(">")+1);//<img/link...src="....>
                 String replaceString=img;
                 if (!replaceString.contains("http")) {
                     newTmp  = newTmp.substring(newTmp.indexOf(replaceString));
@@ -306,9 +302,7 @@ public class UrlDownloaderr {
                 if (file.isDirectory() && !file.isFile()) {
                     urlDown.path = this.path + "\\" + fileName() + "_" + "files";
                 } else {
-                    String s=file.getAbsolutePath();
                     urlDown.path = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf("\\")) + "\\" + fileName() + "_" + "files";
-                    String ss= urlDown.fileName();
                 }
                 urlDown.actions();
                 int length = this.path.length();
