@@ -22,8 +22,10 @@ public class UrlDownloaderr {
     File file;
     boolean flag = false;
     boolean isNew = false;
-    ArrayList<String> list = new ArrayList<>();
 
+    /**
+     * Input Url,Path (path or no),Open (yes or no)
+     */
     public void input() {
         System.out.println("INPUT");
         Scanner scanner = new Scanner(System.in);
@@ -32,12 +34,16 @@ public class UrlDownloaderr {
         if (this.url.equals("")) {
             throw new IllegalStateException();
         }
-        System.out.println("Path (maybe is empty:");
+        System.out.println("Path (your path/NO):");
         this.path = scanner.nextLine();
         System.out.println("Open (YES/NO):");
         this.open = scanner.nextLine();
     }
 
+
+    /**
+     * Connection url
+     */
     public void getConnection() {
         try {
             webUrl = new URL(url);
@@ -46,6 +52,15 @@ public class UrlDownloaderr {
         }
     }
 
+    /**
+     * If the url consists only of a domain then the name is fixed. If url-html,then 'index.thml'.
+     * If not html, then depending on the extension (getLast()).
+     * If the url not consists only of a domain then:
+     * -if the line contains '?' then select everything before the sign and after the last slash;
+     * -if there is no character in the string, then select everything that is between the last two slashes.
+     * @return name of file
+     * @throws IOException
+     */
     public String fileName() throws IOException {
         String strForLength = url.substring(url.indexOf("//") + 2);
         strForLength = strForLength.substring(0, strForLength.indexOf("/"));
@@ -89,6 +104,12 @@ public class UrlDownloaderr {
         }
     }
 
+    /**
+     * The file is saved by default if the path is not specified.
+     * If html: Using a buffer
+     * If not : Using a byte stream (important for saving images)
+     * @throws IOException
+     */
     public void saveDefault() throws IOException {
         file = new File(fileName());
         connection.connect();
@@ -117,6 +138,11 @@ public class UrlDownloaderr {
 
     }
 
+    /**
+     * Connaction and checking whether the url is an html page or any other document.
+     * @return isHtml   True if the url points to an html page.
+     * @throws IOException
+     */
     public boolean isHtml() throws IOException {
         HttpURLConnection urlc = (HttpURLConnection) webUrl.openConnection();
         urlc.setAllowUserInteraction(false);
@@ -126,22 +152,33 @@ public class UrlDownloaderr {
         urlc.setRequestMethod("HEAD");
         urlc.connect();
         String mime = urlc.getContentType();
-        boolean b = false;
+        boolean isHtml = false;
         if (mime == null) {
-            return b;
+            return isHtml;
         }
-        b = mime.startsWith("text/html") ? true : false;
-        if (b) {
+        isHtml = mime.startsWith("text/html") ? true : false;
+        if (isHtml) {
             this.encoding = mime.substring(mime.lastIndexOf("=") + 1, mime.length());
         }
-        return b;
+        return isHtml;
     }
 
+    /**
+     * @return The extension of the document
+     */
     public String getLast() {
         String tmp = url;
         return tmp.substring(tmp.lastIndexOf('.'));
     }
 
+    /**
+     * If the file to be saved does not exist in the specified path or directory,then the file is saved
+     * at the specified path.
+     * If there is already a file on this path, the user is asked to either
+     * replace it (input 'R') or rename the file (input 'N') being saved.
+     * If the specified path is a correctly specified directory, the file is saved at this path.
+     * @throws IOException
+     */
     public void savePath() throws IOException {
         connection.connect();
         isr = new InputStreamReader(connection.getInputStream(), encoding);
@@ -156,7 +193,7 @@ public class UrlDownloaderr {
             }
         }
         if (file.exists() && file.isFile()) {
-            System.out.println("Замена файла 'R'. Переименовать файл 'N'");
+            System.out.println("To replace 'R'. To rename 'N'");
             Scanner scanner = new Scanner(System.in);
             String tmpStr = scanner.nextLine();
             if (tmpStr.equals("R")) {
@@ -177,7 +214,7 @@ public class UrlDownloaderr {
                     os.close();
                 }
             } else if (tmpStr.equals("N")) {
-                System.out.println("Введите новое имя файла");
+                System.out.println("Input new name");
                 String tmp = scanner.nextLine();
                 String editPath = path.substring(0, path.lastIndexOf("\\") + 1);
                 String getEd = path.substring(path.lastIndexOf("."));
@@ -225,6 +262,9 @@ public class UrlDownloaderr {
         }
     }
 
+    /**
+     * Opening a saved file
+     */
     public void openResource() {
         if (Desktop.isDesktopSupported()) {
             try {
@@ -235,6 +275,10 @@ public class UrlDownloaderr {
         }
     }
 
+    /**
+     * Method of action: each outcome depends on the path and open selected earlier by the user.
+     * @throws IOException
+     */
     public void actions() throws IOException {
         if (!flag) {
             input();
@@ -267,13 +311,32 @@ public class UrlDownloaderr {
             }
         }
     }
-                                // <img     //src=
-                                // <link    //href=
+
+    /**
+     * A list is created in which the contents of the file url will be overwritten,taking
+     * into account the change of addresses to the local address.Then there is a search for
+     * the tag. If a tag with the corresponding attribute is found, we check whether it is
+     * included in the description of this attribute 'http'.If it does, the work continues.
+     * If not, the work proceeds to the next search.
+     * When the program continues, a new instance of the class is created, which sets all the
+     * necessary parameters for it:
+     * boolean flag-to bypass data entry in the method actions();
+     * String url;
+     * boolean isNew-to avoid infinite recursion in saving files of saved files;
+     * open;
+     *The found element is saved, and then its new local address is obtained to replace
+     * this information in the original url content.Data is written to the list, and everything
+     * from the list is written to the saved file.
+     *
+     * @param start     Start of the required tag
+     * @param startLink     Attribute
+     * @throws IOException
+     */
     public void savePicturesAndLink(String start,String startLink) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
         file.mkdirs();
         String tmp = "";
-        //ArrayList<String> list = new ArrayList<>();
+        ArrayList<String> list = new ArrayList<>();
         while ((tmp = bufferedReader.readLine()) != null) {
             String newTmp = tmp;
             while (newTmp.contains(start)) {

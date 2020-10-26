@@ -15,10 +15,23 @@ public class Archive {
     ArrayList<String> changesSecondZip = new ArrayList<>();
 
 
+    /**
+     * Initializing the list in the constructor.
+     */
     public Archive() {
         initFileList();
     }
 
+
+    /**
+     * If the paths are zero, an exception is thrown.
+     * In a favorable case, two files are created with the specified paths.
+     * For each of the files, all information is collected in maps and then all information
+     * is saved in a report compareAndAddToChangesTxt(mmm1, mmm2).
+     *
+     * @param pathOne   Path of the first archive
+     * @param pathTwo   Path of the second archive
+     */
     public Archive(String pathOne, String pathTwo) {
         if (pathOne == null || pathTwo == null) {
             throw new IllegalStateException();
@@ -42,6 +55,11 @@ public class Archive {
         }
     }
 
+    /**
+     * Using a custom window. The selection of only those documents that have the extension .zip.
+     * Write documents to the list.
+     * @return fileList
+     */
     public ArrayList<File> getFile() {
         JFileChooser jFileChooser = new JFileChooser();
         jFileChooser.setAcceptAllFileFilterUsed(false);
@@ -59,13 +77,18 @@ public class Archive {
         }
         for (int i = 0; i < fileList.size(); i++) {
             if (fileList.get(i).getName().equals("-1")) {
-                throw new NoSuchElementException("Не был введен путь одного из архивов.");
+                throw new NoSuchElementException("The path of one of the archives was not entered");
             }
         }
         return fileList;
     }
 
 
+    /**
+     * Record information about documents in the archive.
+     * @param file
+     * @return tempMap  Stores file names and sizes
+     */
     public Map<String, Long> addMap(File file) {
         String f = file.getName();
         Map<String, Long> tempMap = new HashMap<>();
@@ -82,6 +105,18 @@ public class Archive {
         return tempMap;
     }
 
+    /**
+     * If the files have the same names and different sizes then each column in the report is written '* update'.
+     * If the files have different names but the same size, then each column in the report is written to '? rename'.
+     * In the right column, all deleted items are recorded , that is, those files that are in the second archive,
+     * but not in the first. The left column contains only all the added elements,i.e. those elements that
+     * are not in the first column but are in the second one.
+     * Text alignment is used when writing to the report.
+     * The report is called 'changes.txt'.
+     *
+     * @param mapOne    Information about files in the first archive
+     * @param mapTwo    Information about files in the second archive
+     */
     public void compareAndAddToChangesTxt(Map<String, Long> mapOne, Map<String, Long> mapTwo) {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("changes.txt"))) {
             bufferedWriter.write("Archive 1" + "\t\t\t\t\t" + "Archive 2\n");
@@ -174,6 +209,6 @@ public class Archive {
 
     public static void main(String[] args) {
         Archive.readyToLaunch();
-        Archive archive = new Archive("Example.zip", "Example - Copy.zip");
+        //Archive archive = new Archive("Example.zip", "Example - Copy.zip");
     }
 }

@@ -1,0 +1,12 @@
+Archive 1					Archive 2
+* update CurriculumVitaeImpl.java | * update CurriculumVitaeImpl.java
+                               | + addNew Location.txt         
+                               | + addNew debugG.txt           
+                               | + addNew Doc                  
+                               | + addNew Doc1                 
+                               | + addNew Doc2                 
+- remove Location.txt          |                               
+- remove debugG.txt            |                               
+- remove Doc                   |                               
+- remove Doc1                  |                               
+- remove Doc2                  |                               
