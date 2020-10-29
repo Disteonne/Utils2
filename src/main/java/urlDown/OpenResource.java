@@ -4,7 +4,13 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Opening a file using the original url
+ */
 public class OpenResource {
+    /**
+     * @param file  File received from the input url
+     */
     public static void openFile(File file) {
         if (Desktop.isDesktopSupported()) {
             try {

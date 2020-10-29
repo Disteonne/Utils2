@@ -3,6 +3,9 @@ package urlDown;
 import java.io.*;
 import java.util.Scanner;
 
+/**
+ * Class write to a file.
+ */
 public class SaveFile {
     private Input object;
     private GetFileName name;
@@ -15,6 +18,14 @@ public class SaveFile {
         this.actionsWithURL = name.getActions();
     }
 
+    /**
+     * Writing a file according to the task condition:
+     * -saving by default, if the path is not specified;
+     * -Saving to the specified path, taking into account the
+     * correctness of the specified directory or the presence
+     * of another file on this path(replacing or changing the name).
+     * @throws IOException    If the connection to the url fails
+     */
     public void save() throws IOException {
         try {
             actionsWithURL.getConnection().connect();
@@ -55,10 +66,14 @@ public class SaveFile {
 
     private File createFile(String pathOrLocalName) {
         File file = new File(pathOrLocalName);
-        //file.mkdirs();
         return file;
     }
 
+    /**
+     * Method for writing to a file (depends on whether the file is an html page or not).
+     * @param file  File to write
+     * @throws IOException
+     */
     public void treadInpOut(File file) throws IOException {
         if (actionsWithURL.isHtmlPage()) {
             try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(actionsWithURL.getConnection().getInputStream(), actionsWithURL.getEncoding(actionsWithURL.isHtmlPage())));
@@ -79,7 +94,6 @@ public class SaveFile {
                     outputStream.write(bytes, 0, length);
                 }
             } catch (IOException exception) {
-                //System.out.println("Tread error");
             }
         }
     }

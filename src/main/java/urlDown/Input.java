@@ -1,5 +1,11 @@
 package urlDown;
 
+/**
+ * Input class for filling in the following parameters:
+ * url;
+ * path;
+ * open.
+ */
 public class Input {
     private  String url = null;
     private  String path = null;

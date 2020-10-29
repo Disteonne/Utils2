@@ -7,6 +7,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.NoSuchElementException;
 
+/**All actions related to the url:
+ *Checking for an html page;
+ *Getting the encoding
+ */
 public class ActionsWithURL {
     private String type="";
     private URLConnection connection=null;

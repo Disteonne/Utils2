@@ -2,9 +2,6 @@ package urlDown;
 
 import java.io.IOException;
 
-/**
- * Getting the file name. All according to the task condition
- */
 public class GetFileName {
     private String expansionString = "";
     private String fileName = "";
@@ -18,16 +15,19 @@ public class GetFileName {
     }
 
     public String getName() throws IOException {
-        String editUrlForName = url.substring(url.lastIndexOf("/") + 1);
+        String editUrlForName=url.substring(url.lastIndexOf("/")+1);
         if (editUrlForName.equals("")) {
             return actions.isHtmlPage() ? "index.html" : "index" + getExpansionString();
         } else {
             if (actions.isHtmlPage()) {
                 if (url.contains("?")) {
                     editUrlForName = (editUrlForName.substring(0, editUrlForName.lastIndexOf("?")));
+                    //return tmpVar.substring(tmpVar.lastIndexOf("/") + 1);
                     return editUrlForName;
                 } else {
-                    return editUrlForName + ".html";
+                    //String tmpVar = url.substring(0, url.lastIndexOf("/"));
+                    //return tmpVar.substring(tmpVar.lastIndexOf("/") + 1);
+                    return editUrlForName+".html";
                 }
             } else {
                 return url.substring(url.lastIndexOf("/") + 1);
@@ -38,8 +38,6 @@ public class GetFileName {
     public String getExpansionString() {
         return expansionString;
     }
-
     public ActionsWithURL getActions() {
         return actions;
     }
-}

@@ -2,6 +2,15 @@ package urlDown;
 
 import java.io.IOException;
 
+/**
+ * Task implementation logic:
+ * -The setting of parameters;
+ * -Working with URLs;
+ * -Getting the file name;
+ * -Writing this file;
+ * -Saving all images and links inside this file;
+ * -Opening the source file.
+ */
 public class Start {
     public String name;
     public boolean isNew=false;
@@ -16,8 +25,8 @@ public class Start {
             saveFile.save();
             if(!isNew && actionsWithURL.isHtmlPage()){
               SaveImgAndLink overrideWithNewSRC=new SaveImgAndLink(saveFile);
-              overrideWithNewSRC.saveSRC("src=\"");
-                overrideWithNewSRC.saveSRC("href=\"");
+              overrideWithNewSRC.saveSrcAndLink("src=\"");
+                overrideWithNewSRC.saveSrcAndLink("href=\"");
                 if(input.getOpen()!=null){
                     OpenResource.openFile(saveFile.getNewFile());
                 }
