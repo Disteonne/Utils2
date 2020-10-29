@@ -4,6 +4,7 @@ public class Input {
     private  String url = null;
     private  String path = null;
     private  String open = null;
+
     public void  input(String[] args){
         if(args.length==1){
             this.url=args[0];

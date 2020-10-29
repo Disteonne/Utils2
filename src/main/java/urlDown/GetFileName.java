@@ -15,20 +15,22 @@ public class GetFileName {
     }
 
     public String getName() throws IOException {
-        if (url.indexOf("//") == url.lastIndexOf("//")) {
+        String editUrlForName=url.substring(url.lastIndexOf("/")+1);
+        if (editUrlForName.equals("")) {
             return actions.isHtmlPage() ? "index.html" : "index" + getExpansionString();
         } else {
-            String tmpVar = url;
             if (actions.isHtmlPage()) {
                 if (url.contains("?")) {
-                    tmpVar = (tmpVar.substring(0, tmpVar.lastIndexOf("?")));
-                    return tmpVar.substring(tmpVar.lastIndexOf("/") + 1);
+                    editUrlForName = (editUrlForName.substring(0, editUrlForName.lastIndexOf("?")));
+                    //return tmpVar.substring(tmpVar.lastIndexOf("/") + 1);
+                    return editUrlForName;
                 } else {
-                    tmpVar = tmpVar.substring(0, tmpVar.lastIndexOf("/"));
-                    return tmpVar.substring(tmpVar.lastIndexOf("/") + 1);
+                    //String tmpVar = url.substring(0, url.lastIndexOf("/"));
+                    //return tmpVar.substring(tmpVar.lastIndexOf("/") + 1);
+                    return editUrlForName+".html";
                 }
             } else {
-                return tmpVar.substring(tmpVar.lastIndexOf("/") + 1);
+                return url.substring(url.lastIndexOf("/") + 1);
             }
         }
     }

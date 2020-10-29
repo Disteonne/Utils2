@@ -7,6 +7,7 @@ public class SaveFile {
     private Input object;
     private GetFileName name;
     private ActionsWithURL actionsWithURL;
+    private File newFile;
 
     public SaveFile(Input object, GetFileName name) {
         this.object = object;
@@ -21,10 +22,11 @@ public class SaveFile {
             System.out.println("Connect error");
         }
         if (object.getPath() == null) {
-            File localFile = createFile(name.getName());
-            treadInpOut(localFile);
+           this.newFile= createFile(name.getName());
+            treadInpOut(newFile);
         } else {
-            File newFile = createFile(object.getPath());
+            this.newFile = createFile(object.getPath());
+            newFile.mkdirs();
             if (!newFile.exists()) {
                 treadInpOut(newFile);
             }
@@ -40,12 +42,12 @@ public class SaveFile {
                     String editPath = object.getPath().substring(0, object.getPath().lastIndexOf("\\") + 1);
                     String getEd = object.getPath().substring(object.getPath().lastIndexOf("."));
                     String res = editPath + newName + getEd;
-                    newFile = new File(res);
+                    this.newFile = new File(res);
                     treadInpOut(newFile);
                 }
             }
             if (newFile.isDirectory() && !newFile.isFile()) {
-                newFile = new File(object.getPath() + "\\" + name.getName());
+                this.newFile = new File(object.getPath() + "\\" + name.getName());
                 treadInpOut(newFile);
             }
         }
@@ -58,7 +60,6 @@ public class SaveFile {
     }
 
     public void treadInpOut(File file) throws IOException {
-        //actionsWithURL.getConnection().connect();
         if (actionsWithURL.isHtmlPage()) {
             try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(actionsWithURL.getConnection().getInputStream(), actionsWithURL.getEncoding(actionsWithURL.isHtmlPage())));
                 BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
@@ -78,8 +79,16 @@ public class SaveFile {
                     outputStream.write(bytes, 0, length);
                 }
             } catch (IOException exception) {
-                System.out.println("Tread error");
+                //System.out.println("Tread error");
             }
         }
+    }
+
+    public GetFileName getName() {
+        return name;
+    }
+
+    public File getNewFile() {
+        return newFile;
     }
 }
