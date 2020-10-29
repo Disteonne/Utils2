@@ -41,9 +41,9 @@ public class Archive {
         if (fileOne.exists() && fileTwo.exists()) {
             fileList.add(fileOne);
             fileList.add(fileTwo);
-            Map<String, Long> mmm1 = addMap(fileList.get(0));
-            Map<String, Long> mmm2 = addMap(fileList.get(1));
-            compareAndAddToChangesTxt(mmm1, mmm2);
+            Map<String, Long> mapFirstFile = addMap(fileList.get(0));
+            Map<String, Long> mapSecondFile = addMap(fileList.get(1));
+            compareAndAddToChangesTxt(mapFirstFile, mapSecondFile);
         } else
             throw new IllegalStateException();
 
@@ -90,7 +90,6 @@ public class Archive {
      * @return tempMap  Stores file names and sizes
      */
     public Map<String, Long> addMap(File file) {
-        String f = file.getName();
         Map<String, Long> tempMap = new HashMap<>();
         try {
             ZipInputStream zip = new ZipInputStream(new FileInputStream(file), StandardCharsets.ISO_8859_1);
@@ -139,59 +138,59 @@ public class Archive {
                     }
                 }
             }
-            ArrayList<String> m1 = new ArrayList<>();
-            ArrayList<String> m2 = new ArrayList<>();
+            ArrayList<String> listForFile1 = new ArrayList<>();
+            ArrayList<String> listForFile2 = new ArrayList<>();
             for (Map.Entry<String, Long> pair : mapOne.entrySet()
             ) {
-                m1.add(pair.getKey());
+                listForFile1.add(pair.getKey());
             }
             for (Map.Entry<String, Long> pair1 : mapTwo.entrySet()
             ) {
-                m2.add(pair1.getKey());
+                listForFile2.add(pair1.getKey());
             }
 
-            for (int i = 0; i < m2.size(); i++) {
-                boolean b1 = false;
-                for (int j = 0; j < m1.size(); j++) {
-                    if (m2.get(i).equals(m1.get(j))) {
-                        b1 = true;
+            for (int i = 0; i < listForFile2.size(); i++) {
+                boolean flag = false;
+                for (int j = 0; j < listForFile1.size(); j++) {
+                    if (listForFile2.get(i).equals(listForFile1.get(j))) {
+                        flag = true;
                         break;
                     }
                 }
-                if (b1) {
+                if (flag) {
                    continue;
                 }
-                boolean b = false;
+                boolean flagTwo = false;
                 for (int j = 0; j < allChanges.size(); j++) {
-                    if (allChanges.get(j).equals(m2.get(i))) {
-                        b = true;
+                    if (allChanges.get(j).equals(listForFile2.get(i))) {
+                        flagTwo = true;
                     }
                 }
-                if (!b) {
-                    bufferedWriter.write(String.format("%-30.40s","")+" | "+String.format("%-30.40s","+ addNew "+m2.get(i))+"\n");
+                if (!flagTwo) {
+                    bufferedWriter.write(String.format("%-30.40s","")+" | "+String.format("%-30.40s","+ addNew "+listForFile2.get(i))+"\n");
                 }
             }
 
-            for (int i = 0; i < m2.size(); i++) {
-                boolean b1=false;
-                for (int j = 0; j < m1.size(); j++) {
-                    if (m1.get(j).equals(m2.get(i))) {
-                        b1=true;
+            for (int i = 0; i < listForFile2.size(); i++) {
+                boolean flagThree=false;
+                for (int j = 0; j < listForFile1.size(); j++) {
+                    if (listForFile1.get(j).equals(listForFile2.get(i))) {
+                        flagThree=true;
                         break;
                     }
                 }
-                if(b1){
+                if(flagThree){
                     continue;
                 }
-                boolean b = false;
+                boolean flagFour = false;
                 for (int k = 0; k < allChanges.size(); k++) {
-                    if (allChanges.get(k).endsWith(m2.get(i))) {
-                        b = true;
+                    if (allChanges.get(k).endsWith(listForFile2.get(i))) {
+                        flagFour = true;
                         break;
                     }
                 }
-                if (!b) {
-                    String str="- remove "+m2.get(i);
+                if (!flagFour) {
+                    String str="- remove "+listForFile2.get(i);
                     bufferedWriter.write(String.format("%-30.40s",str)+" | "+String.format("%-30.40s","")+"\n");
                 }
             }
@@ -202,13 +201,18 @@ public class Archive {
     public static void readyToLaunch() {
         Archive archive = new Archive();
         ArrayList<File> file = archive.getFile();
-        Map<String, Long> mmm1 = archive.addMap(file.get(0));
-        Map<String, Long> mmm2 = archive.addMap(file.get(1));
-        archive.compareAndAddToChangesTxt(mmm1, mmm2);
+        Map<String, Long> mapOne = archive.addMap(file.get(0));
+        Map<String, Long> mapTwo = archive.addMap(file.get(1));
+        archive.compareAndAddToChangesTxt(mapOne, mapTwo);
     }
 
     public static void main(String[] args) {
-        Archive.readyToLaunch();
-        //Archive archive = new Archive("Example.zip", "Example - Copy.zip");
+        if(args.length==2){
+            //Archive archive = new Archive("Example.zip", "Example - Copy.zip");
+            Archive archive = new Archive(args[0],args[1]);
+        }
+        if(args.length==0){
+            Archive.readyToLaunch();
+        }
     }
 }
